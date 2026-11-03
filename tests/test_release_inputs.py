@@ -100,7 +100,7 @@ Path('args.json').write_text(json.dumps(sys.argv[1:]))
                         self.assertEqual(args, ['-tzf', f'dist/release/{app_name}-server-1.2.3-linux-x86_64.tar.gz'])
 
     def test_server_archive_name_is_preserved(self):
-        result, args, injected = self.run_step('server', 'Check the archive', 'pdf')
+        result, args, injected = self.run_step('server', 'Check the archive', 'pdfaxiom')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(args, ['-tzf', 'dist/release/pdfaxiom-server-1.2.3-linux-x86_64.tar.gz'])
         self.assertFalse(injected)
