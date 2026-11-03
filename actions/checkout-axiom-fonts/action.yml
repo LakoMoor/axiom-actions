@@ -1,0 +1,24 @@
+name: "Check out axiom-fonts"
+description: "Checks out the LakoMoor/axiom-fonts repository if a ref is specified"
+
+inputs:
+  ref:
+    description: "The git commit SHA or ref of LakoMoor/axiom-fonts"
+    required: false
+    default: ""
+  path:
+    description: "Directory path to check out axiom-fonts into"
+    required: false
+    default: "axiom-fonts"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check out axiom-fonts
+      if: inputs.ref != ''
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: LakoMoor/axiom-fonts
+        ref: ${{ inputs.ref }}
+        path: ${{ inputs.path }}
+        persist-credentials: false

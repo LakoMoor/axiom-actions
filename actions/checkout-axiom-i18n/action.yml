@@ -1,0 +1,46 @@
+name: "Check out axiom-i18n"
+description: "Checks out LakoMoor/axiom-i18n at the caller's axiom-i18n.rev, if it has one, and sets AXIOM_I18N_DIR and AXIOM_I18N_REQUIRED=1 for the rest of the job"
+
+inputs:
+  path:
+    description: "Directory path to check out axiom-i18n into"
+    required: false
+    default: "axiom-i18n"
+
+outputs:
+  rev:
+    description: "The pinned axiom-i18n SHA; empty when the caller has no axiom-i18n.rev"
+    value: ${{ steps.pin.outputs.rev }}
+
+runs:
+  using: "composite"
+  steps:
+    # The pin file switches the feature on. Without it this action changes nothing.
+    # Trim it: Windows runners may check it out with CRLF.
+    - name: Read axiom-i18n.rev
+      id: pin
+      shell: bash
+      run: |
+        [ -f axiom-i18n.rev ] || exit 0
+        rev=$(tr -d '[:space:]' < axiom-i18n.rev)
+        if ! [[ "$rev" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "::error file=axiom-i18n.rev::expected one 40-character axiom-i18n commit SHA, found '$rev'"
+          exit 1
+        fi
+        echo "rev=$rev" >>"$GITHUB_OUTPUT"
+    - name: Check out axiom-i18n
+      if: steps.pin.outputs.rev != ''
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: LakoMoor/axiom-i18n
+        ref: ${{ steps.pin.outputs.rev }}
+        path: ${{ inputs.path }}
+        persist-credentials: false
+    - name: Require axiom-i18n in builds
+      if: steps.pin.outputs.rev != ''
+      shell: bash
+      env:
+        AXIOM_I18N_DIR: ${{ github.workspace }}/${{ inputs.path }}
+      run: |
+        echo "AXIOM_I18N_DIR=$AXIOM_I18N_DIR" >>"$GITHUB_ENV"
+        echo "AXIOM_I18N_REQUIRED=1" >>"$GITHUB_ENV"
